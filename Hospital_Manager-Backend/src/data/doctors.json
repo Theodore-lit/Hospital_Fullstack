@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "name": "Theodore Lima",
+        "email": "theodore@gmail.com",
+        "password": "1234",
+        "speciality": "Generaliste",
+        "phone": "123-456-789",
+        "available": true,
+        "service": "Praticien",
+        "role": "doctor",
+        "image": "doctorImg",
+        "status": "disponible"
+    }
+]

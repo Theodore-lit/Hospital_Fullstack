@@ -1,0 +1,70 @@
+[
+  {
+    "id": 1,
+    "name": "A1",
+    "capacity": 4,
+    "occupiedBy": [
+      1773147955167,
+      1773147957269
+    ]
+  },
+  {
+    "id": 2,
+    "name": "A2",
+    "capacity": 4,
+    "occupiedBy": [
+      1773142219634,
+      null
+    ]
+  },
+  {
+    "id": 3,
+    "name": "B1",
+    "capacity": 4,
+    "occupiedBy": [
+      452,
+      452,
+      null,
+      1773145601341
+    ]
+  },
+  {
+    "id": 4,
+    "name": "B2",
+    "capacity": 4,
+    "occupiedBy": [
+      1773143610552,
+      null
+    ]
+  },
+  {
+    "id": 5,
+    "name": "C1",
+    "capacity": 4,
+    "occupiedBy": []
+  },
+  {
+    "id": 6,
+    "name": "C2",
+    "capacity": 5,
+    "occupiedBy": [
+      452
+    ]
+  },
+  {
+    "id": 7,
+    "name": "D1",
+    "capacity": 4,
+    "occupiedBy": [
+      452
+    ]
+  },
+  {
+    "id": 8,
+    "name": "D2",
+    "capacity": 9,
+    "occupiedBy": [
+      1773143904812
+    ]
+  }
+]

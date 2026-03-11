@@ -1,0 +1,34 @@
+[
+      {
+        "id": 1,
+        "name": "Theodore Lima",
+        "email": "theodore@gmail.com",
+        "password": "1234",
+        "speciality": "Generaliste",
+        "phone": "123-456-789",
+        "available": true,
+        "service": "Praticien",
+        "role": "doctor",
+        "image": "doctorImg"
+      },
+      {
+        "id": 2,
+        "name": "Kamal Abiala",
+        "email": "kamal@gmail.com",
+        "password": "1234",
+        "phone": "852-456-789",
+        "role": "admin",
+        "image": "adminImg",
+        "service": "Administration"
+      },
+      {
+        "id": 3,
+        "name": "Stella Smith",
+        "email": "renaud@gmail.com",
+        "password": "1234",
+        "phone": "123-456-789",
+        "role": "receptionnist",
+        "image": "receptionImg",
+        "service": "Acceuil général"
+      }
+    ]
