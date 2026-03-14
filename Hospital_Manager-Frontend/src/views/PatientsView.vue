@@ -8,15 +8,28 @@ import { useAppointmentsStore } from '@/stores/Appointement'
 import { useDoctorsStore } from '@/stores/doctor'
 //sweetalerte
 import Swal from 'sweetalert2'
-const showError = () => {
+import { apiFetch } from '@/services/api.js'
+// const f = await apiFetch()
+// console.log(f);
+
+const showError = (message) => {
   Swal.fire({
     icon: 'error',
     title: 'Oops...',
-    text: 'Ce médecin est occuppé à cette date',
+    text: message,
   })
 }
-const doctorsStore = useDoctorsStore()
-const appointmentsStore = useAppointmentsStore()
+
+const addAlerte = (message) => {
+  Swal.fire({
+    position: 'top-end',
+    icon: 'success',
+    title: message,
+    showConfirmButton: false,
+    timer: 1500,
+  })
+}
+
 const roomStore = useRoomStore()
 const patientStore = usePatientsStore()
 let allPatients = ref([])
@@ -25,10 +38,14 @@ const date = ref()
 let patientId
 let removeId
 const doctorId = ref()
+const doctors = ref()
+
 let modalPlanning = ref(null)
-function planningModal(patient) {
+async function planningModal(patient) {
   modalPlanning.value = true
   patientId = patient.id
+  const data = await apiFetch('/doctors/available')
+  doctors.value = [...data]
 }
 
 const nows = new Date()
@@ -36,49 +53,24 @@ nows.setMinutes(nows.getMinutes() - nows.getTimezoneOffset())
 const formatted = nows.toISOString().slice(0, 16)
 
 async function patients() {
-  const data = await fetch('http://localhost:3000/api/patients/allPatients', {
-    method: 'GET',
-  })
-  const res = await data.json()
-  allPatients.value = [...res.patients]
+  const data = await apiFetch('/patients/allPatients')  
+  allPatients.value = [...data.patients]
+  
 }
 
-// function submitPlanning() {
-//   modalPlanning.value = false;
-//   if (
-//     !appointmentsStore.appointments.find(
-//       (x) =>
-//         new Date(date.value).getTime() <= new Date(x.date).getTime() + 5400000 &&
-//         x.doctorId == doctorId.value
-//     )
-//   ) {
-//     patientStore.patients.find((pt) => pt.id == patientId).status = "Consultation";
-//     patientStore.patients.find((pt) => pt.id == patientId).doctorId = doctorId.value;
-//     let rdv = {
-//       id: Date.now(),
-//       patientId: patientId,
-//       doctorId: doctorId.value,
-//       date: date.value,
-//     };
-//     appointmentsStore.addAppointments(rdv);
-//   } else {
-//     showError();
-//   }
-// }
-
 async function submitPlanning() {
-  const data = await fetch('http://localhost:3000/api/appointments', {
+  const data = await apiFetch('/appointments', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      patientId,
+      patientId: patientId,
       doctorId: doctorId.value,
       date: date.value,
     }),
   })
-  if (!data.ok) return showError()
+  if (!data.ok) return showError("'Ce médecin est occuppé à cette date'")
 
   modalPlanning.value = false
   doctorId.value = ''
@@ -91,15 +83,13 @@ function removePlanningModal() {
 
 let modalDelete = ref(null)
 async function yesRemove() {
-  const dataPatient = await fetch(`http://localhost:3000/api/patients/${removeId}`, {
+  const dataPatient = await apiFetch(`/patients/${removeId}`, {
     method: 'DELETE',
   })
-  const dataRoom = await fetch(`http://localhost:3000/api/rooms/desassign/${removeId}`, {
-    method: 'DELETE',
-  })
-  // if (!dataPatient.ok) throw new Error()
+  if (!dataPatient.ok) showError('Impossible de supprimer ce patient')
   await patients()
   modalDelete.value = false
+  addAlerte("Rendez-vous pris")
 }
 
 const confirmDelete = (id) => {
@@ -107,15 +97,16 @@ const confirmDelete = (id) => {
   modalDelete.value = true
 }
 
-watch(
-  () => patientStore.newAdd,
-  (newadd) => {
-    if (newadd) {
-      patients()
-      patientStore.notifNew(null)
-    }
-  },
-)
+// watch(
+//   () => patientStore.newAdd,
+//   (newadd) => {
+//     if (newadd) {
+//       console.log(newadd)
+//       patients()
+//       patientStore.notifNew(null)
+//     }
+//   },
+// )
 
 onMounted(patients)
 </script>
@@ -219,7 +210,7 @@ onMounted(patients)
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             >
               <option value="" disabled>Sélectionner un médecin</option>
-              <option v-for="doc in doctorsStore.availableDoctors" :key="doc.id" :value="doc.id">
+              <option v-for="doc in doctors" :key="doc.id" :value="doc.id">
                 Dr. {{ doc.name }} — {{ doc.specialty }}
               </option>
             </select>
@@ -335,9 +326,7 @@ onMounted(patients)
                   </p>
                   <p
                     class="text-[10px] text-blue-500 font-medium mt-0.5 uppercase tracking-tighter"
-                  >
-                    <!-- <p class="text-xs text-slate-400 mt-0.5">ID: #{{ patient.id.toString().slice(-5) }}</p> -->
-                  </p>
+                  ></p>
 
                   <p
                     class="text-[10px] text-blue-500 font-medium mt-0.5 uppercase tracking-tighter"
@@ -392,13 +381,6 @@ onMounted(patients)
             </td>
 
             <td class="px-6 py-5 text-center">
-              <!-- <button
-                v-if="patient.status == 'En attente' || patient.status == 'Sorti'"
-                @click="planningModal(patient)"
-                class="px-2 py-1 text-white cursor-pointer bg-blue-500 rounded-full hover:bg-blue-500 focus:outline-none focus:shadow-outline-red font-light active:bg-blue-600 transition duration-150 ease-in-out"
-              >
-                Plannifier un rdv
-              </button> -->
               <button
                 v-if="patient.status == 'En attente' || patient.status == 'Sorti'"
                 @click="planningModal(patient)"
@@ -501,7 +483,7 @@ onMounted(patients)
         </tbody>
       </table>
 
-      <div v-if="manageStore.filteredPatients.length === 0" class="py-20 text-center">
+      <div v-if="allPatients.length === 0" class="py-20 text-center">
         <p class="text-slate-400 font-medium">Aucun patient ne correspond à votre recherche.</p>
       </div>
     </div>

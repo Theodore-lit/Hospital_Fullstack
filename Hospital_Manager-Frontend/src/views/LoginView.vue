@@ -9,10 +9,6 @@ const email = ref('')
 const password = ref('')
 const cannotConnect = ref(false)
 const loginStore = useLoginStore()
-// const coordonneeUser = {
-//   email: email.value,
-//   password: password.value,
-// }
 
 async function login() {
   const data = await fetch('http://localhost:3000/api/user/login', {
@@ -21,16 +17,15 @@ async function login() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-  email: email.value,
-  password: password.value,
-}),
+      email: email.value,
+      password: password.value,
+    }),
   })
 
-  
   if (data.ok) {
-    const currentUser = await data.json();    
+    const currentUser = await data.json()
     loginStore.login(currentUser)
-    
+
     Swal.fire({
       position: 'top-end',
       icon: 'success',
@@ -46,7 +41,7 @@ async function login() {
       admin: 'dashboard-admin',
       doctor: 'dashboard-doctor',
       receptionnist: 'dashboard-receptionnist',
-    }    
+    }
     router.push({ name: roleRoute[currentUser.data?.role] })
   } else {
     cannotConnect.value = true
@@ -64,20 +59,6 @@ async function login() {
       <div class="text-center mb-8">
         <div class="flex justify-center mb-3">
           <div class="bg-blue-700 text-white p-3 rounded-full shadow-md">
-            <!-- <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m7-7v14"
-              />
-            </svg> -->
             <svg
               class="h-8 w-8 fill-white"
               xmlns="http://www.w3.org/2000/svg"

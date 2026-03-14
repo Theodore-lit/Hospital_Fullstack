@@ -1,4 +1,5 @@
 <script setup>
+import { apiFetch } from '@/services/api.js'
 import { usePatientsStore } from '@/stores/patient'
 import { useRoomStore } from '@/stores/room'
 import { onMounted, ref } from 'vue'
@@ -9,8 +10,11 @@ const roomStore = useRoomStore()
 let patientsNeedRoom = ref([])
 
 async function needRoom() {
-  const data = await fetch('http://localhost:3000/api/patients/needRoom')
-  if (!data.ok) throw new Error()
+  const data = await apiFetch('/patients/needRoom')
+  // const data = await fetch('http://localhost:3000/api/patients/needRoom', {
+  //   credentials: "include",
+  // })
+  if (!data.ok) return (patientsNeedRoom.value = [])
   const res = await data.json()
   patientsNeedRoom.value = [...res]
   needRoomStore.giveNumber(needRoom.length)
@@ -21,13 +25,17 @@ const patientsStore = usePatientsStore()
 let newRoomId = ref(null)
 async function giveRoom(patientId) {
   // if (form.value.roomId) {
-  const data = await fetch('http://localhost:3000/api/rooms/assign', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+  const data = await apiFetch('/rooms/assign', {
     body: JSON.stringify({ patientId: patientId, roomId: newRoomId.value }),
   })
+  // const data = await fetch('http://localhost:3000/api/rooms/assign', {
+  //   method: 'POST',
+  //   credentials: 'include',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ patientId: patientId, roomId: newRoomId.value }),
+  // })
   if (!data.ok) {
     console.log("Impossible d'éffectuer cette action")
   }

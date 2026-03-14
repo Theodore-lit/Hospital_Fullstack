@@ -14,7 +14,7 @@ const router = Router();
 router.post("/", addRoom);
 router.get("/all", allRooms);
 router.post("/assign", assignRoom);
-router.delete("/desassign/:id", desaignRoom);
+router.delete("/desassign", desaignRoom);
 router.get("/available", availableRoms);
 router.get("/:id", getRoomById);
 router.put("/:id", updateRoom);

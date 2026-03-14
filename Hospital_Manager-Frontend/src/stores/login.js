@@ -6,7 +6,7 @@ import receptionImg from '@/assets/receptionnist.jpg'
 
 export const useLoginStore = defineStore('login', {
   state: () => ({
-    isAuthentificated: '',
+    token: null,
     currentUser:  [],
   }),
 
@@ -14,19 +14,12 @@ export const useLoginStore = defineStore('login', {
 
   actions: {
     login(newuser) {
-        this.isAuthentificated = true
-        this.currentUser = newuser
+        this.token = newuser.token
+        this.currentUser = newuser.data
       },
       logout() {
-        this.isAuthentificated = ''
+        this.token = null
         this.currentUser = []
-      // localStorage.removeItem('medicalUser')
-    },
-    addUser(user) {
-      this.users.push(user)
-    },
-    removerUser(id) {
-      this.users = this.users.filter((us) => us.id != id)
     },
   },
 })

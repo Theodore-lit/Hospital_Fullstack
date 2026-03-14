@@ -31,9 +31,7 @@ async function stateConnection() {
     router.replace({ name: "login" });
   }
 }
-const isAuthenticated = computed(
-  () => loginStore.isAuthentificated && loginStore.currentUser
-);
+
 
 </script>
 
@@ -65,7 +63,7 @@ const isAuthenticated = computed(
             >
           </div>
 
-          <div class="flex items-center space-x-4" v-if="loginStore.isAuthentificated">
+          <div class="flex items-center space-x-4" v-if="loginStore.token">
             <div class="hidden md:block h-6 w-px bg-white mx-2"></div>
 
             <div class="dropdown relative group">
@@ -79,8 +77,8 @@ const isAuthenticated = computed(
                     class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 overflow-hidden border-2 border-white shadow-sm"
                   >
                     <img
-                      :src="loginStore.currentUser?.data.image"
-                      :alt="loginStore.currentUser?.data.role"
+                      :src="loginStore.currentUser?.image"
+                      :alt="loginStore.currentUser?.role"
                       class="h-full w-full object-cover"
                     />
                   </div>
@@ -91,11 +89,11 @@ const isAuthenticated = computed(
 
                 <div class="hidden lg:flex flex-col items-start leading-tight">
                   <span class="text-sm font-bold text-blue-500">{{
-                    loginStore.currentUser?.data.name
+                    loginStore.currentUser?.name
                   }}</span>
                   <span
                     class="text-[10px] uppercase font-bold text-white tracking-wider"
-                    >{{ loginStore.currentUser?.data.role }}</span
+                    >{{ loginStore.currentUser?.role }}</span
                   >
                 </div>
 
@@ -113,17 +111,17 @@ const isAuthenticated = computed(
                       class="h-11 w-11 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 overflow-hidden mr-3 border border-blue-100"
                     >
                       <img
-                        :src="loginStore.currentUser?.data.image"
+                        :src="loginStore.currentUser?.image"
                         alt="User"
                         class="h-full w-full object-cover"
                       />
                     </div>
                     <div class="overflow-hidden">
                       <p class="font-bold text-gray-900 truncate">
-                        {{ loginStore.currentUser?.data.name }}
+                        {{ loginStore.currentUser?.name }}
                       </p>
                       <p class="text-xs text-gray-500 truncate">
-                        {{ loginStore.currentUser?.data.email }}
+                        {{ loginStore.currentUser?.email }}
                       </p>
                     </div>
                   </div>
@@ -171,7 +169,7 @@ const isAuthenticated = computed(
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                       />
                     </svg>
-                    {{ loginStore.isAuthentificated ? "Sign out" : "Sign in" }}
+                    {{ loginStore.token ? "Sign out" : "Sign in" }}
                   </a>
                 </div>
               </div>

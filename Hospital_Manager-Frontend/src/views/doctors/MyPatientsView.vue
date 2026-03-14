@@ -1,19 +1,20 @@
 <script setup>
-import { useLoginStore } from "@/stores/login";
-import { usePatientsStore } from "@/stores/patient";
-import { useRoomStore } from "@/stores/room";
-import { onMounted } from "vue";
-const roomStore = useRoomStore();
-const loginSotore = useLoginStore();
-const patients = usePatientsStore();
-const doctor = loginSotore.currentUser;
+import { useLoginStore } from '@/stores/login'
+import { usePatientsStore } from '@/stores/patient'
+import { useRoomStore } from '@/stores/room'
+import { onMounted } from 'vue'
+const roomStore = useRoomStore()
+const loginSotore = useLoginStore()
+const patients = usePatientsStore()
+const doctor = loginSotore.currentUser
 // const doctorPatients = patients.patientsByDoctor(doctor);
 
 let myPatients = []
 async function doctorPatients() {
-  const data = await fetch('http://localhost:3000/api/patients/mypatients');
-  const res = await data.json();
+  const data = await fetch('http://localhost:3000/api/patients/mypatients')
+  const res = await data.json()
   myPatients = [...res]
+  console.log(res)
 }
 onMounted(doctorPatients)
 </script>
@@ -63,9 +64,7 @@ onMounted(doctorPatients)
         </select>
       </div>
     </div>
-    <div
-      class="bg-white shadow-xl mt-12 rounded-2xl overflow-hidden border border-slate-200"
-    >
+    <div class="bg-white shadow-xl mt-12 rounded-2xl overflow-hidden border border-slate-200">
       <table class="min-w-full text-sm text-left">
         <!-- HEADER -->
         <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider">
@@ -82,11 +81,7 @@ onMounted(doctorPatients)
 
         <!-- BODY -->
         <tbody class="divide-y divide-slate-100">
-          <tr
-            v-for="patient in myPatients"
-            :key="patient.id"
-            class="hover:bg-slate-50 transition"
-          >
+          <tr v-for="patient in myPatients" :key="patient.id" class="hover:bg-slate-50 transition">
             <!-- Patient -->
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
@@ -109,8 +104,8 @@ onMounted(doctorPatients)
                   patient.status == 'En attente'
                     ? 'bg-yellow-100 text-yellow-700'
                     : patient.status == 'Consultation'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-green-100 text-green-700'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-green-100 text-green-700'
                 "
               >
                 {{ patient.status }}
@@ -138,7 +133,7 @@ onMounted(doctorPatients)
                 v-if="patient.roomId"
                 class="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-xs font-bold"
               >
-                {{ roomStore.rooms.find((r) => r.id === patient.roomId)?.name || "N/A" }}
+                {{ roomStore.rooms.find((r) => r.id === patient.roomId)?.name || 'N/A' }}
               </span>
               <span v-else class="text-xs text-slate-300 italic">Non assignée</span>
             </td>

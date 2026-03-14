@@ -1,115 +1,99 @@
-import RECEPTIONNISTS from "../data/receptionnists.json" with { type: "json" };
+import {
+  createReceptionnist,
+  deleteReceptionnist,
+  listReceptionnists,
+  findOne,
+  updateReceptionnist,
+} from "../services/Receptionnist.service.js";
 
-export const getRecept = (req, res) => {
-  const limit = parseInt(req.query.limit ?? 10);
-  const page = parseInt(req.query.page ?? 1);
-  const searchByName = req.query.search;
-  let receptionnists = [...RECEPTIONNISTS];
-  if (page < 1 || limit < 1) {
-    res.status(400).json({ message: "Page or limit must be >= 1" });
-    return;
-  }
-  const start = (page - 1) * limit;
-  receptionnists = receptionnists.slice(start, start + limit);
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
 
-  if (searchByName) {
-    receptionnists = RECEPTIONNISTS.filter((recp) => {
-      const fullName = recp.name.toLowerCase();
-      const matchesSearch = fullName.includes(searchByName.toLowerCase());
-      return matchesSearch;
-    });
+export async function list(req, res, next) {
+  try {
+    const { page, limit, search, speciatily } = req.query;
+    const receptionnists = await listReceptionnists({ page, limit, search});
+    return res.status(200).json(receptionnists.items);
+    next()
+  } catch (error) {
+    return next(error);
   }
-  res.status(200).json({ receptionnists });
-};
+}
+
 
 // rechercher un receptionnist par son id
-export const getReceptById = (req, res) => {
-  const recptId = req.params.id;
-  const receptionnist = RECEPTIONNISTS.find((recp) => recp.id === Number(recptId));
-  if (receptionnist.length == 0)
-    return res.status(400).json({ message: "Bad request" });
-  res.status(200).json(receptionnist);
-};
-
-// ajout de receptionnist
-export const addRecept = (req, res) => {
-  let templateReceptionnist = {
-    id: Date.now(),
-    password: "1234",
-    role: "receptionnist",
-    service: "Acceuil général"
-  };
-  const newRecept = req.body;
-
-  if (
-    !newRecept.name &&
-    !newRecept.email && newRecept.phone
-  )
-    return res.status(400).json("Bad request");
-  if (
-    newRecept.name &&
-    newRecept.email && newRecept.phone
-  ) {
-    templateReceptionnist = { ...newRecept };
-    let data = fs.readFileSync("src/data/receptionnists.json", "utf-8");
-    let dataUsers = fs.readFileSync("src/data/users.json", "utf-8");
-    let users = JSON.parse(dataUsers);
-    let receptionnists = JSON.parse(data);
-    receptionnists.push(templateReceptionnist);
-    users.push(templateReceptionnist);
-    fs.writeFileSync("src/data/receptionnists.json", JSON.stringify(receptionnists, null, 2));
-    fs.writeFileSync("src/data/users.json", JSON.stringify(users, null, 2));
-    res.status(201).json({ message: "patient added" });
+export async function findById(req, res, next) {
+  const id = req.params.id;
+  try {
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        error: {
+          message: "Invalid id",
+        },
+      });
+    }
+    const receptionnist = await findOne(id);
+    if (!receptionnist)
+      return res.status(404).json({ error: { message: "Not found" } });
+    res.status(200).json(receptionnist[0]);
+    next()
+  } catch (error) {
+    next(error);
   }
-};
+}
+
+
+export async function create(req, res, next) {
+  const {name, service, phone, email, role, image} = req.body;
+  try {
+    const receptionnist = await createReceptionnist({name, service, phone, speciality, status, email, role, image});
+    res.status(201).json({ message: "ok" });
+    next()
+  } catch (error) {
+    next(error);
+  }
+}
 
 // modifier un receptionnist
-export const updateRecept = (req, res) => {
-  let data = fs.readFileSync("src/data/receptionnists.json", "utf-8");
-  let dataUsers = fs.readFileSync("src/data/users.json", "utf-8");
-  let users = JSON.parse(dataUsers);
-  let receptionnists = JSON.parse(data);
-  const updateId = res.params.id;
-  const toUpdate = res.body;
-  const index = receptionnists.findIndex((r) => r.id === updateId);
-  const indexUser = users.findIndex((r) => r.id === updateId);
-  if (toUpdate.role || toUpdate.id)
-    return res.status(400).json({ message: "Bad request" });
-  if (
-    index !== -1 &&
-    (toUpdate.name ||
-      toUpdate.email ||
-      toUpdate.specialty ||
-      toUpdate.phone ||
-      toUpdate.experience ||
-      toUpdate.city)
-  ) {
-    receptionnists[index] = { ...receptionnists[index],...toUpdate };
-    users[indexUser] = { ...users[indexUser],...toUpdate };
-    fs.writeFileSync("src/data/receptionnists.json", JSON.stringify(receptionnists, null, 2));
-    fs.writeFileSync("src/data/users.json", JSON.stringify(users, null, 2));
-    res.status(201).json({ message: "update sucessfully" });
-  } else {
-    res.status(400).json({ message: "Not found" });
-  }
-};
 
-// suppression d'un receptionnist
-export const removeRecept = (req, res) => {
-  const recptId = req.params.id;
-  let dataDoc = fs.readFileSync("src/data/receptionnists.json", "utf-8");
-  let dataUsers = fs.readFileSync("src/data/users.json", "utf-8");
-  let receptionnists = JSON.parse(dataDoc);
-  let users = JSON.parse(dataUsers);
-  let deletedDoc = receptionnists.find((recp) => recp.id == recptId);
-  let deletedUser = users.find((us) => us.id == recptId);
-  if (deletedDoc || deletedUser) {
-    receptionnists = receptionnists.filter((recp) => recp.id !== recptId);
-    users = users.filter((us) => us.id !== recptId);
-    fs.writeFileSync("src/data/receptionnists.json", JSON.stringify(receptionnists, null, 2));
-    fs.writeFileSync("src/data/users.json", JSON.stringify(receptionnists, null, 2));
-    res.status(200).json({ message: "patient deleted" });
-  } else {
-    res.status(404).json({ message: "Not found" });
+export async function update(req, res, next) {
+  const id = req.params.id;
+  const newInfo = req.body;
+  try {
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        error: {
+          message: "Invalid id",
+        },
+      });
+    }
+    const receptionnist = await updateReceptionnist(id, newInfo);
+    if (!receptionnist)
+      return res.status(404).json({ error: { message: "Not found" } });
+    res.status(201).json({ message: "ok" });
+    next()
+  } catch (error) {
+    next(error);
   }
-};
+}
+
+// supprimer un receptionnist
+
+export async function remove(req, res, next) {
+  const id = req.params.id;
+  try {
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        error: {
+          message: "Invalid id",
+        },
+      });
+    }
+    const receptionnist = await deleteReceptionnist(id);
+    res.status(200).json({ message: "ok" });
+    next()
+  } catch (error) {
+    next(error);
+  }
+}

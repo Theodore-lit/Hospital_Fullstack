@@ -1,11 +1,10 @@
 [
     {
-        "id": 1,
-        "name": "Theodore Lima",
-        "email": "theodore@gmail.com",
-        "password": "1234",
-        "speciality": "Generaliste",
-        "phone": "123-456-789",
+        "name": "Junior Aupiaire",
+        "email": "junior@gmail.com",
+        "password": "123456",
+        "speciality": "Chirugin",
+        "phone": "1245689",
         "available": true,
         "service": "Praticien",
         "role": "doctor",

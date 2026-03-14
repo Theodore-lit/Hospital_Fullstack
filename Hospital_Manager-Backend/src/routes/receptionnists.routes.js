@@ -1,17 +1,11 @@
 import { Router } from "express";
-import {
-  addRecept,
-  getRecept,
-  getReceptById,
-  updateRecept,
-  removeRecept,
-} from "../controllers/receptionnist.controller.js";
+import * as controllerReceptionnist from "../controllers/receptionnist.controller.js";
 const router = Router();
-router.get('/', getRecept)
-router.get('/:id', getReceptById)
-router.post('/', addRecept)
-router.put('/:id', updateRecept)
-router.delete('/:id', removeRecept)
+router.get('/', controllerReceptionnist.findById )
+router.get('/:id', controllerReceptionnist.findById )
+router.post('/', controllerReceptionnist.create )
+router.put('/:id', controllerReceptionnist.update )
+router.delete('/:id', controllerReceptionnist.remove )
 
 
 export default router;

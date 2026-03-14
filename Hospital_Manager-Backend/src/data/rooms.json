@@ -12,21 +12,13 @@
     "id": 2,
     "name": "A2",
     "capacity": 4,
-    "occupiedBy": [
-      1773142219634,
-      null
-    ]
+    "occupiedBy": []
   },
   {
     "id": 3,
     "name": "B1",
     "capacity": 4,
-    "occupiedBy": [
-      452,
-      452,
-      null,
-      1773145601341
-    ]
+    "occupiedBy": []
   },
   {
     "id": 4,
@@ -64,7 +56,8 @@
     "name": "D2",
     "capacity": 9,
     "occupiedBy": [
-      1773143904812
+      1773143904812,
+      1773263247394
     ]
   }
 ]

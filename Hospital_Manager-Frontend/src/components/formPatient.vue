@@ -7,6 +7,7 @@ import { useDoctorsStore } from '@/stores/doctor'
 import { useAppointmentsStore } from '@/stores/Appointement'
 //sweetalerte
 import Swal from 'sweetalert2'
+import { apiFetch } from '@/services/api'
 const showError = (message) => {
   Swal.fire({
     icon: 'error',
@@ -26,24 +27,21 @@ const addAlerte = () => {
 }
 let doctors = ref([])
 async function availableDoctors() {
-  const data = await fetch('http://localhost:3000/api/doctors/available')
-  const res = await data.json()
-  doctors.value = [...res]
+  const data = await apiFetch('/doctors/available')
+  // const res = await data.json()  
+  doctors.value = [...data]
 }
 let rooms = ref([])
 async function availableRooms() {
-  const data = await fetch('http://localhost:3000/api/rooms/available')
-  const res = await data.json()
-  rooms.value = [...res]
+  const data = await apiFetch('/rooms/available')
+  // const res = await data.json()
+  rooms.value = [...data]
 }
 
 const doctorsStore = useDoctorsStore()
-// const doctors = doctorsStore.doctors
 const patientsStore = usePatientsStore()
 const manageStore = usePatientManageStore()
-// const roomStore = useRoomStore()
 const modalAdd = ref(false)
-// const appointmentsStore = useAppointmentsStore()
 let date = ref()
 const now = new Date()
 now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
@@ -95,11 +93,11 @@ async function handleSubmit() {
     form.value.roomId = null
   }
   if (manageStore.selectedPatientForEdit) {
-    // manageStore.updatePatient(form.value);
-    const data = await fetch(
-      `http://localhost:3000/api/patients/${manageStore.selectedPatientForEdit.id}`,
+    const data = await apiFetch(
+      `/patients/${manageStore.selectedPatientForEdit.id}`,
       {
         method: 'PUT',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
@@ -108,41 +106,16 @@ async function handleSubmit() {
     )
     manageStore.clearEdit()
   } else {
-    // if (date.value) {
-    //   const data = await fetch('http://localhost:3000/api/appointments', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       patientId: form.value.patientId,
-    //       doctorId: form.value.doctorId,
-    //       date: date.value,
-    //     }),
-    //   })
-    //   if (!data.ok) return showError('Le médecin est occuppé à cette date')
-    // }
-
-    // if (form.value.roomId) {
-    //   const data = await fetch('http://localhost:3000/api/rooms/assign', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ patientId: form.value.id, roomId: form.value.roomId }),
-    //   })
-    //   if (!data.ok) {
-    //     console.log("Impossible d'éffectuer cette action")
-    //   }
-    // }
-    const data = await fetch('http://localhost:3000/api/patients', {
+    const data = await apiFetch('/patients', {
       method: 'POST',
+      credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(form.value),
     })
-    // if (data.status == 404) return showError('Le médecin est occuppé à cette date')
+    
+    if (data.status == 404) return showError('Le médecin est occuppé à cette date')
     if (!data.ok) return showError('Vérifer tous les champs avant soumission')
     addAlerte()
     patientsStore.notifNew(true)

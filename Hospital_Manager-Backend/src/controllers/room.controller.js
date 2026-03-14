@@ -122,13 +122,14 @@ export const assignRoom = (req, res) => {
 
 // libérer un patient de son lit
 export const desaignRoom = (req, res) => {
-  const patientId = req.params.id;
+  const patientId = req.body.patientId;
+  const roomId = req.body.roomId;
   const data = JSON.parse(fs.readFileSync("src/data/rooms.json", "utf-8"));
   const rooms = [...data];  
-  const room = rooms.find(r => r.occupiedBy.includes(patientId));  
+  const room = rooms.find(r => r.id === Number(roomId));
   if (!room) return res.status(400).json({ message: "Not found" });
   let index = room.occupiedBy.indexOf(patientId);
   room.occupiedBy.splice(index, 1);
   fs.writeFileSync("src/data/rooms.json", JSON.stringify(rooms, null, 2));
-  res.status(200).json({ message: "room assigned" });
+  res.status(200).json({ message: "room desassigned" });
 };

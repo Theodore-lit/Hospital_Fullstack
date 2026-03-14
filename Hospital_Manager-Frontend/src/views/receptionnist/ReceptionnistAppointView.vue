@@ -1,4 +1,5 @@
 <script setup>
+import { apiFetch } from '@/services/api.js'
 import { useAppointmentsStore } from '@/stores/Appointement'
 import { useDoctorsStore } from '@/stores/doctor'
 import { usePatientsStore } from '@/stores/patient'
@@ -14,19 +15,19 @@ const appointmentsStore = useAppointmentsStore()
 
 let appointments = ref([])
 async function allAppointments() {
-  const data = await fetch('http://localhost:3000/api/appointments/all')
-  const res = data.json()
-  appointments.value = [...res]
+const data = await apiFetch('/appointments/all')
+  // const data = await fetch('http://localhost:3000/api/appointments/all', {
+  //   credentials: "include",
+  // })
+  // const res = await data.json()
+  appointments.value = [...data]
 }
 
-const date = (id) => {
-  const appoint = appointmentsStore.appointments.find((apt) => apt.id == id)
-  if (appoint) {
-    const [date, heure] = appoint.date.split('T')
-    return {
-      date: date,
-      heure: heure,
-    }
+const date = (dt) => {
+  const [date, heure] = dt.split('T')
+  return {
+    date: date,
+    heure: heure,
   }
 }
 
@@ -34,7 +35,6 @@ let modalDelete = ref(null)
 let removeId
 function yesRemove() {
   appointmentsStore.deleteAppointments(removeId)
-  console.log(appointmentsStore.appointments)
 
   modalDelete.value = false
 }
@@ -43,20 +43,6 @@ const confirmDelete = (id) => {
   modalDelete.value = true
 }
 
-const getStatusClass = (status) => {
-  switch (status) {
-    case 'En attente':
-      return 'bg-amber-400 text-white py-1 rounded-full px-3 max-w-[60%] text-center'
-    case 'Consultation':
-      return 'bg-blue-400 text-white py-1 rounded-full px-3 max-w-[60%] text-center'
-    case 'Sorti':
-      return 'bg-emerald-400 text-white py-1 rounded-full px-3 max-w-[60%] text-center'
-    case 'Hospitalisation':
-      return 'bg-red-500 text-red-100 py-1 rounded-full px-3 max-w-[60%] text-center'
-    default:
-      return ''
-  }
-}
 onMounted(allAppointments)
 </script>
 
@@ -105,7 +91,7 @@ onMounted(allAppointments)
 
   <!-- <div class="antialiased font-sans min-h-screen w-full"> -->
   <div class="min-h-screen px-10 py-8">
-    <h1 class="text-3xl text-green-950 font-semibold">Agenda des consultations</h1>
+    <h1 class="text-3xl text-green-950 font-semibold">Régistre des consultations</h1>
     <div
       class="flex flex-col my-12 md:flex-row gap-4 items-center bg-white/80 z-1 backdrop-blur-md p-2 pl-6 rounded-lg shadow-sm border border-slate-200"
     >
@@ -127,11 +113,10 @@ onMounted(allAppointments)
         <input
           v-model="appointmentsStore.searchQuery"
           type="text"
-          placeholder="Rechercher un dossier patient..."
+          placeholder="Rechercher un rendez-vous patient..."
           class="bg-transparent border-none focus:ring-0 w-full text-slate-700 placeholder-slate-400 py-3"
         />
       </div>
-
       <div class="flex items-center gap-2 pr-2 w-full md:w-auto">
         <select
           v-model="appointmentsStore.doctorFilter"
@@ -158,19 +143,15 @@ onMounted(allAppointments)
                 Médecin
               </th>
               <th class="px-6 py-5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                État
+              </th>
+              <th class="px-6 py-5 text-xs font-bold uppercase tracking-wider text-slate-500">
                 Date
               </th>
               <th class="px-6 py-5 text-xs font-bold uppercase tracking-wider text-slate-500">
                 Heure
               </th>
-              <th
-                class="px-6 py-5 text-xs font-bold uppercase tracking-wider text-slate-500 text-center"
-              >
-                Chambre
-              </th>
-              <th class="px-6 py-5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                État
-              </th>
+
               <th class="px-6 py-5"></th>
             </tr>
           </thead>
@@ -198,32 +179,10 @@ onMounted(allAppointments)
               </td>
 
               <!-- Médecin -->
-              <td class="px-6 py-5 text-slate-700 font-medium">Dr {{ apt.doctors.name }}</td>
-
-              <!-- Date -->
-              <td class="px-6 py-5 text-slate-600">
-                {{ date(apt.idAppoint).date }}
-              </td>
-
-              <!-- Heure -->
-              <td class="px-6 py-5 text-slate-600">
-                {{ date(apt.idAppoint).heure }}
-              </td>
-
-              <!-- Chambre -->
-              <td class="px-6 py-5 text-center">
-                <span
-                  v-if="roomStore.getRoomById(apt.patient.roomId)"
-                  class="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-xs font-bold"
-                >
-                  {{ roomStore.getRoomById(apt.patient.roomId).name }}
-                </span>
-
-                <span v-else class="text-xs text-slate-300 italic"> Non assignée </span>
-              </td>
+              <td class="px-6 py-5 text-slate-700 font-medium">Dr {{ apt.doctor }}</td>
 
               <!-- Status -->
-              <td class="px-6 py-5">
+              <!-- <td class="px-6 py-5">
                 <span
                   :class="{
                     'bg-amber-50 text-amber-700 border-amber-100':
@@ -248,12 +207,43 @@ onMounted(allAppointments)
                   ></span>
                   {{ apt.patient.status }}
                 </span>
+              </td> -->
+
+              <!-- Status du rendez-vous -->
+              <td class="px-6 py-5 text-slate-600">
+                <span
+                  :class="{
+                    'bg-amber-50 text-amber-700 border-amber-100': apt.mode === 'En cours',
+                    'bg-emerald-50 text-emerald-700 border-emerald-100': apt.mode === 'Attente',
+                    'bg-red-50 text-red-700 border-red-100': apt.mode === 'Passé',
+                  }"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
+                >
+                  <span
+                    :class="{
+                      'bg-amber-400': apt.mode === 'En cours',
+                      'bg-emerald-400': apt.mode === 'Attente',
+                      'bg-red-400': apt.mode === 'Passé',
+                    }"
+                    class="h-1.5 w-1.5 rounded-full"
+                  ></span>
+                  {{ apt.mode }}
+                </span>
+              </td>
+
+              <!-- Date -->
+              <td class="px-6 py-5 text-slate-600">
+                {{ date(apt.dateAppoint).date }}
+              </td>
+
+              <!-- Heure -->
+              <td class="px-6 py-5 text-slate-600">
+                {{ date(apt.dateAppoint).heure }}
               </td>
 
               <!-- Action -->
               <td class="px-6 py-5 text-right">
                 <button
-                  v-if="apt.patient.status == 'Sorti'"
                   @click="confirmDelete(apt.idAppoint)"
                   class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                   title="Archiver"
@@ -279,7 +269,7 @@ onMounted(allAppointments)
         </table>
       </div>
 
-      <div v-if="appointmentsStore.filteredByPatient.length === 0" class="py-20 text-center">
+      <div v-if="appointments.length === 0" class="py-20 text-center">
         <p class="text-slate-400 font-medium">Aucun rendez-vous trouvé.</p>
       </div>
     </div>

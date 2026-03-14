@@ -185,8 +185,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const loginStore = useLoginStore()
-  const logged = loginStore.isAuthentificated
-  const userRole = loginStore.currentUser.data?.role
+  const logged = loginStore.token
+  const userRole = loginStore.currentUser.role
 
   if (to.meta.requiresAuth && !logged) {
     next({ name: 'login' })

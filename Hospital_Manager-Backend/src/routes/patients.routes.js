@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { addPatient, allPatients, changeStatus, deletePatient, doctorPatients, doctorPatientsById, getPatientsById, patientNeedRoom, updatePatient } from "../controllers/patient.controller.js";
+import * as patientsController from "../controllers/patient.controller.js"; 
 const router = Router()
 
-router.get('/allpatients', allPatients)
-router.get('/mypatients', doctorPatients)
-router.get('/needRoom', patientNeedRoom)
-router.get('/mypatients/:id', doctorPatientsById)
-router.put('/changestatus/:id', changeStatus)
-router.get('/:id', getPatientsById)
-router.post('/', addPatient)
-router.put('/:id', updatePatient)
-router.delete('/:id', deletePatient)
+router.get('/allpatients', patientsController.list)
+router.get('/mypatients', patientsController.doctorPatients)
+router.get('/needRoom', patientsController.patientNeedRoom)
+router.get('/mypatients/:id', patientsController.doctorPatientsById)
+router.put('/changestatus/:id', patientsController.changeStatus)
+router.get('/:id', patientsController.findById)
+router.post('/', patientsController.create)
+router.put('/:id', patientsController.update)
+router.delete('/:id', patientsController.remove)
 
 export default router

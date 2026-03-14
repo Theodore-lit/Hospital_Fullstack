@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { removeDoctor,updateDoctor, addDoctor, availableDoctors, getDoctorById, getDoctors } from "../controllers/doctor.controller.js";
+import * as controllerDoctor from "../controllers/doctor.controller.js";
+import * as controllerslogin from "../controllers/login.controller.js";
 const router = Router()
-router.get('/', getDoctors);
-router.post('/', addDoctor)
-router.get('/available', availableDoctors)
-router.get('/:id', getDoctorById);
-router.put('/:id', updateDoctor);
-router.delete('/:id', removeDoctor)
+router.get('/', controllerDoctor.list );
+router.post('/', controllerDoctor.create, controllerslogin.create )
+router.get('/available', controllerDoctor.availableDoctors)
+router.get('/:id', controllerDoctor.findById );
+router.put('/:id', controllerDoctor.update );
+router.delete('/:id', controllerDoctor.remove, controllerslogin.remove )
 
 export default router

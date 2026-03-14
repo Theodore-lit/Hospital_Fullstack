@@ -11,9 +11,11 @@ export const allAppointments = (req, res) => {
   const byDoctorName = req.query.doctor;
 
   let appointmentsAll = APPOINTMENTS.map((apt) => ({
-    doctor: DOCTORS.find((doc) => doc.id == apt.doctorId),
+    doctor: DOCTORS.find((doc) => doc.id == apt.doctorId).name,
     patient: PATIENTS.find((pat) => pat.id == apt.patientId),
     idAppoint: apt.id,
+    dateAppoint: apt.date,
+    mode: new Date(apt.date).getTime() + 5400000 <= Date.now() ? "Passé" : new Date(apt.date).getTime() < Date.now() && new Date(apt.date).getTime() + 5400000 > Date.now() ? "En cours" : "Attente"
   }));
   if (page < 1 || limit < 1) {
     res.status(400).json({ message: "Page or limit must be >= 1" });
@@ -35,28 +37,30 @@ export const allAppointments = (req, res) => {
       return matchesSearchPatient && matchesSearchDoctor;
     });
   }
-  res.status(200).json({ appointments });
+  res.status(200).json( appointments );
 };
 
 export async function addAppointments(req, res) {
   try {
     const rdv = req.body;
+    
     if (
       !APPOINTMENTS.find(
         (x) =>
           new Date(req.date).getTime() <=
-            new Date(x.date).getTime() + 5400000 && x.doctorId == req.doctorId,
+        new Date(x.date).getTime() + 5400000 && x.doctorId === Number(rdv.doctorId),
       )
     ) {
       rdv.id = Date.now();
-      const dataPatient = fs.readFileSync("src/data/patients.json", "utf-8");
-      const data = fs.readFileSync("src/data/appointments.json", "utf-8");
-      let appointments = data.json();
-      let patients = dataPatient.json();
+      const patients = JSON.parse(fs.readFileSync("src/data/patients.json", "utf-8"));
+      const appointments = JSON.parse(fs.readFileSync("src/data/appointments.json", "utf-8"));
       appointments.push(rdv);
-      let patient = patients.find((p) => p.id === Number(req.patientId));
+      let patient = patients.find((p) => p.id === Number(rdv.patientId));
+      
       patient.status = "Consultation";
+      patient.aptDate = rdv.date;
       patient.doctorId = req.doctorId;
+      
       fs.writeFileSync(
         "src/data/appointments.json",
         JSON.stringify(appointments, null, 2),
@@ -66,10 +70,12 @@ export async function addAppointments(req, res) {
         JSON.stringify(patients, null, 2),
       );
       res.status(200).json({ message: "appointment saved" });
-    } else {
+    } 
+    else {
       res.status(400).json({ message: "Bad request" });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: "error" });
   }
 }
@@ -77,7 +83,7 @@ export async function addAppointments(req, res) {
 export const deleteAppointments = (req, res) => {
   const appointId = req.params.id;
   const data = fs.readFileSync("src/data/appointments.json", "utf-8");
-  let appointments = data.json();
+  let appointments = JSON.parse(data);
   let appoint = appointments.find((apt) => apt.id === Number(appointId));
   if (appoint) {
     appointments = appointments.filter((apt) => apt.id != id);
@@ -127,6 +133,7 @@ export const appointmentsByDoctor = (req, res) => {
     });
   }
   APPOINTMENTSdoctor = [...appointments];
+  
   res.status(200).json(appointments);
 };
 
