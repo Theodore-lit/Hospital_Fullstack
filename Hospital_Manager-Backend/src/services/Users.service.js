@@ -14,6 +14,15 @@ export function createUser(payload) {
   return User.create(payload);
 }
 
+// export async function createUser({ name, email, password, role }) {
+//   try {
+//     const user = await User.create({ name, email, password, role });
+//     return user;
+//   } catch (error) {
+//     throw error; // 🚨 PAS next(error)
+//   }
+// }
+
 export function findOne(email) {
   return User.find({ email: email });
 }

@@ -41,8 +41,9 @@ console.log(user);
 }
 
 export async function create(req, res, next) {
-  const { name, email, role } = req.doctor;
-  const password = req.password;
+  const { name, email, password,role } = req.body;
+  // const { name, email, role } = req.doctor;
+  // const password = req.password;
   try {
     console.log({ name, email, password, role })
     const user = await createUser({ name, email, password, role });
@@ -64,13 +65,15 @@ export async function update(req, res, next) {
   }
 }
 
-export async function remove(req, res, next) {
+export async function remove(req, res) {
   const email = req.body;
   try {
     const user = await deleteUser(email);
     if (!user) return res.status(404).json({ message: "Not found" });
     res.status(200).json({ message: "✅" });
   } catch (error) {
-    next(error);
+    // next(error);
+    console.log(error);
+    
   }
 }

@@ -4,7 +4,7 @@ const router = Router()
 
 router.post('/login', controllerslogin.login)
 router.post('/register', controllerslogin.create)
-router.delete('/', controllerslogin.remove)
-router.patch('/', controllerslogin.update)
+// router.delete('/', controllerslogin.remove)
+// router.patch('/', controllerslogin.update)
 
 export default router
